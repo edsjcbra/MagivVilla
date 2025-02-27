@@ -1,5 +1,6 @@
 
 using MagicVilla_VillaApi.Data;
+using MagicVilla_VillaApi.Mapping;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +15,9 @@ builder.Services.AddDbContext<AppDbContext>(option =>
 {
     option.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+//AUTOMAPPER
+builder.Services.AddAutoMapper(typeof(MappingConfig));
 
 var app = builder.Build();
 

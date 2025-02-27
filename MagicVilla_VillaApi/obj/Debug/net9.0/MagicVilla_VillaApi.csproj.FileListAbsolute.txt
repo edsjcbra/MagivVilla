@@ -127,3 +127,4 @@ C:\_Dev\MagicVilla_VillaAPI\MagicVilla_VillaApi\bin\Debug\net9.0\tr\Microsoft.Co
 C:\_Dev\MagicVilla_VillaAPI\MagicVilla_VillaApi\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 C:\_Dev\MagicVilla_VillaAPI\MagicVilla_VillaApi\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 C:\_Dev\MagicVilla_VillaAPI\MagicVilla_VillaApi\obj\Debug\net9.0\MagicVilla_VillaApi.sourcelink.json
+C:\_Dev\MagicVilla_VillaAPI\MagicVilla_VillaApi\bin\Debug\net9.0\AutoMapper.dll
