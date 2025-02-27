@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using MagicVilla_VillaApi.Data;
 using MagicVilla_VillaApi.Models;
 using MagicVilla_VillaApi.Models.DTOs;
 using MagicVilla_VillaApi.Repository.IRepository;
@@ -25,7 +24,7 @@ public class VillaApiController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<List<VillaDto>>> GetVillas()
     {
-        IEnumerable<Villa> villas = await _repository.GetAllVillaAsync();
+        IEnumerable<Villa> villas = await _repository.GetAllAsync();
         return Ok(_mapper.Map<List<VillaDto>>(villas));
     }
 
@@ -40,7 +39,7 @@ public class VillaApiController : ControllerBase
             return BadRequest();
         }
 
-        var villa = await _repository.GetVillaByIdAsync(x => x.Id == id);
+        var villa = await _repository.GetByIdAsync(x => x.Id == id);
         if (villa == null)
         {
             return NotFound();
@@ -53,22 +52,22 @@ public class VillaApiController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<Villa>> AddVilla([FromBody] CreateVillaDto CreatevillaDto)
+    public async Task<ActionResult<Villa>> AddVilla([FromBody] CreateVillaDto createVillaDto)
     {
-        if (await _repository.GetVillaByIdAsync(x => x.Name == CreatevillaDto.Name.ToLower()) != null)
+        if (await _repository.GetByIdAsync(x => x.Name == createVillaDto.Name.ToLower()) != null)
         {
             ModelState.AddModelError("CustomError", "Villa already exists");
             return BadRequest(ModelState);
         }
 
-        if (CreatevillaDto == null)
+        if (createVillaDto == null)
         {
-            return BadRequest(CreatevillaDto);
+            return BadRequest(createVillaDto);
         }
 
-        var villaToAdd = _mapper.Map<Villa>(CreatevillaDto);
+        var villaToAdd = _mapper.Map<Villa>(createVillaDto);
 
-        await _repository.CreateVillaAsync(villaToAdd);
+        await _repository.CreateAsync(villaToAdd);
 
         return CreatedAtRoute("GetVilla", new { id = villaToAdd.Id }, villaToAdd);
     }
@@ -84,27 +83,27 @@ public class VillaApiController : ControllerBase
             return BadRequest();
         }
 
-        var villaToDelete = await _repository.GetVillaByIdAsync(x => x.Id == id);
+        var villaToDelete = await _repository.GetByIdAsync(x => x.Id == id);
         if (villaToDelete == null)
         {
             return NotFound();
         }
 
-        _repository.DeleteVillaAsync(villaToDelete);
+        _repository.DeleteAsync(villaToDelete);
         return NoContent();
     }
 
     [HttpPut("/api/VillaAPI/{id}", Name = "UpdateVilla")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UpdateVilla(int id, [FromBody] UpdateVillaDto UpdatevillaDto)
+    public async Task<IActionResult> UpdateVilla(int id, [FromBody] UpdateVillaDto updateVillaDto)
     {
-        if (UpdatevillaDto.Id == null || id != UpdatevillaDto.Id)
+        if (updateVillaDto.Id == null || id != updateVillaDto.Id)
         {
             return BadRequest();
         }
 
-        var villaToUpdate = _mapper.Map<Villa>(UpdatevillaDto);
+        var villaToUpdate = _mapper.Map<Villa>(updateVillaDto);
 
         await _repository.UpdateVillaAsync(villaToUpdate);
         return NoContent();
@@ -120,7 +119,7 @@ public class VillaApiController : ControllerBase
             return BadRequest();
         }
 
-        var villaFromDb = await _repository.GetVillaByIdAsync(x => x.Id == id, tracked: false);
+        var villaFromDb = await _repository.GetByIdAsync(x => x.Id == id, tracked: false);
         if (villaFromDb == null)
         {
             return BadRequest();

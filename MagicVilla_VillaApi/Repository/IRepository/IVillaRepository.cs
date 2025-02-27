@@ -4,12 +4,7 @@ using MagicVilla_VillaApi.Models.DTOs;
 
 namespace MagicVilla_VillaApi.Repository.IRepository;
 
-public interface IVillaRepository
+public interface IVillaRepository : IRepository<Villa>
 {
-    Task<List<Villa>> GetAllVillaAsync(Expression<Func<Villa, bool>> filter = null);
-    Task<Villa> GetVillaByIdAsync(Expression<Func<Villa, bool>> filter = null, bool tracked = true);
-    Task CreateVillaAsync(Villa villa);
     Task UpdateVillaAsync(Villa villa);
-    Task DeleteVillaAsync(Villa villa);
-    Task SaveAsync();
 }
