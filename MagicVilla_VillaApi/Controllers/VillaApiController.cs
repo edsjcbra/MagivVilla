@@ -2,9 +2,9 @@
 using MagicVilla_VillaApi.Data;
 using MagicVilla_VillaApi.Models;
 using MagicVilla_VillaApi.Models.DTOs;
+using MagicVilla_VillaApi.Repository.IRepository;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace MagicVilla_VillaApi.Controllers;
 
@@ -12,12 +12,12 @@ namespace MagicVilla_VillaApi.Controllers;
 [Route("/api/VillaAPI")]
 public class VillaApiController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IVillaRepository _repository;
     private readonly IMapper _mapper;
 
-    public VillaApiController(AppDbContext context, IMapper mapper)
+    public VillaApiController(IVillaRepository repository, IMapper mapper)
     {
-        _context = context;
+        _repository = repository;
         _mapper = mapper;
     }
 
@@ -25,7 +25,7 @@ public class VillaApiController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<List<VillaDto>>> GetVillas()
     {
-        IEnumerable<Villa> villas = await _context.Villas.ToListAsync();
+        IEnumerable<Villa> villas = await _repository.GetAllVillaAsync();
         return Ok(_mapper.Map<List<VillaDto>>(villas));
     }
 
@@ -40,7 +40,7 @@ public class VillaApiController : ControllerBase
             return BadRequest();
         }
 
-        var villa = await _context.Villas.FirstOrDefaultAsync(x => x.Id == id);
+        var villa = await _repository.GetVillaByIdAsync(x => x.Id == id);
         if (villa == null)
         {
             return NotFound();
@@ -55,7 +55,7 @@ public class VillaApiController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<Villa>> AddVilla([FromBody] CreateVillaDto CreatevillaDto)
     {
-        if (await _context.Villas.FirstOrDefaultAsync(x => x.Name == CreatevillaDto.Name.ToLower()) != null)
+        if (await _repository.GetVillaByIdAsync(x => x.Name == CreatevillaDto.Name.ToLower()) != null)
         {
             ModelState.AddModelError("CustomError", "Villa already exists");
             return BadRequest(ModelState);
@@ -68,8 +68,7 @@ public class VillaApiController : ControllerBase
 
         var villaToAdd = _mapper.Map<Villa>(CreatevillaDto);
 
-        await _context.Villas.AddAsync(villaToAdd);
-        await _context.SaveChangesAsync();
+        await _repository.CreateVillaAsync(villaToAdd);
 
         return CreatedAtRoute("GetVilla", new { id = villaToAdd.Id }, villaToAdd);
     }
@@ -85,14 +84,13 @@ public class VillaApiController : ControllerBase
             return BadRequest();
         }
 
-        var villa = await _context.Villas.FirstOrDefaultAsync(v => v.Id == id);
-        if (villa == null)
+        var villaToDelete = await _repository.GetVillaByIdAsync(x => x.Id == id);
+        if (villaToDelete == null)
         {
             return NotFound();
         }
 
-        _context.Villas.Remove(villa);
-        await _context.SaveChangesAsync();
+        _repository.DeleteVillaAsync(villaToDelete);
         return NoContent();
     }
 
@@ -108,8 +106,7 @@ public class VillaApiController : ControllerBase
 
         var villaToUpdate = _mapper.Map<Villa>(UpdatevillaDto);
 
-        _context.Villas.Update(villaToUpdate);
-        await _context.SaveChangesAsync();
+        await _repository.UpdateVillaAsync(villaToUpdate);
         return NoContent();
     }
 
@@ -123,7 +120,7 @@ public class VillaApiController : ControllerBase
             return BadRequest();
         }
 
-        var villaFromDb = await _context.Villas.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+        var villaFromDb = await _repository.GetVillaByIdAsync(x => x.Id == id, tracked: false);
         if (villaFromDb == null)
         {
             return BadRequest();
@@ -139,8 +136,7 @@ public class VillaApiController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        _context.Villas.Update(villaFromDb);
-        await _context.SaveChangesAsync();
+        await _repository.UpdateVillaAsync(villaFromDb);
 
         return NoContent();
     }
