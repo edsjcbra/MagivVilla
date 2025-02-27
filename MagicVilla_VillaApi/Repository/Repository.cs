@@ -32,11 +32,7 @@ public class Repository<T> : IRepository<T> where T : class
         {
             query = query.AsNoTracking();
         }
-        if (filter != null)
-        {
-            query = query.Where(filter);
-        }
-        return await query.FirstOrDefaultAsync();
+        return await query.FirstOrDefaultAsync(filter);
     }
 
     public async Task CreateAsync(T entity)
